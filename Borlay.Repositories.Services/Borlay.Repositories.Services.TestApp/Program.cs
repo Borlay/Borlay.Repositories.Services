@@ -1,7 +1,6 @@
 ﻿using Borlay.Arrays;
 using Borlay.Protocol;
 using Borlay.Repositories.RocksDb;
-using Borlay.Serialization.Converters;
 using Borlay.Serialization.Notations;
 using RocksDbSharp;
 using System;
