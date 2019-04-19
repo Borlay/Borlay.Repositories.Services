@@ -10,6 +10,7 @@
     <RepositoryUrl>https://github.com/Borlay/Borlay.Repositories.Services.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Repository Database DB Key Value</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,13 @@
     <PackageReference Include="Borlay.Handling" Version="1.0.16" />
     <PackageReference Include="Borlay.Repositories" Version="1.0.6" />
     <PackageReference Include="Borlay.Serialization" Version="1.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
