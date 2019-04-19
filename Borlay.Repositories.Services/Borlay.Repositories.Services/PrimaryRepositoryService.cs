@@ -2,6 +2,7 @@
 using Borlay.Serialization.Converters;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,20 +38,72 @@ namespace Borlay.Repositories.Services
             }
         }
 
+        public async Task Save(T[] entities)
+        {
+            using (var transaction = repository.CreateTransaction())
+            {
+                var buffer = new byte[1024];
+                foreach (var entity in entities)
+                {
+                    var index = 0;
+                    serializer.AddBytes(entity, buffer, ref index);
+                    transaction.AppendValue(entity.Id, buffer, index);
+                }
+
+                await transaction.Commit();
+            }
+        }
+
         public async Task<T> Get(ByteArray entityId)
         {
-            var buffer = repository.Get(entityId);
-            if (buffer == null || buffer.Length == 0)
-                return null;
+            var bytes = repository.Get(entityId);
+            var entity = Serialize(bytes);
+            return entity;
+        }
 
-            var index = 0;
-            var entity = serializer.GetObject(buffer, ref index);
-            return (T)entity;
+        public async Task<T[]> Get(ByteArray[] entityIds)
+        {
+            var entities = repository.Get(entityIds).Select(s => Serialize(s.Value)).ToArray();
+            return entities;
         }
 
         public async Task<T[]> Get(OrderType orderType, int skip, int take)
         {
-            throw new NotSupportedException();
+            var keys = repository.Get(orderType).Select(s => new ByteArray(s)).Skip(skip).Take(take).ToArray();
+            var entities = repository.Get(keys).Select(s => Serialize(s.Value)).ToArray();
+            return entities;
+        }
+
+        public async Task<T[]> GetDistinct(OrderType orderType, int skip, int take)
+        {
+            var keys = repository.Get(orderType).Select(s => new ByteArray(s)).Distinct().Skip(skip).Take(take).ToArray();
+            var entities = repository.Get(keys).Select(s => Serialize(s.Value)).ToArray();
+            return entities;
+        }
+
+        public async Task<bool> Contains(ByteArray entityId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> Remove(ByteArray entityId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> Remove(ByteArray[] entityIds)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual T Serialize(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0)
+                return null;
+
+            var index = 0;
+            var entity = serializer.GetObject(bytes, ref index);
+            return (T)entity;
         }
     }
 }

@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
+    <Version>1.0.1</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Paulius Kanoverskis</Authors>
+    <Copyright>Paulius Kanoverskis</Copyright>
+    <PackageProjectUrl>http://borlay.org</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Borlay/Borlay.Repositories.Services.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Repository Database DB Key Value</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
