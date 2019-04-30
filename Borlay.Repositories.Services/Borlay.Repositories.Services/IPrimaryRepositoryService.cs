@@ -23,18 +23,21 @@ namespace Borlay.Repositories.Services
         Task<T[]> Get(ByteArray[] entityIds);
 
         [IdAction(5)]
-        Task<T[]> Get(OrderType orderType, int skip, int take);
+        Task<T[]> Get(int skip, int take);
 
         [IdAction(6)]
-        Task<T[]> GetDistinct(OrderType orderType, int skip, int take);
+        Task<T[]> Get(OrderType orderType, int skip, int take);
 
         [IdAction(7)]
-        Task<bool> Contains(ByteArray entityId);
+        Task<T[]> GetDistinct(OrderType orderType, int skip, int take);
 
         [IdAction(8)]
-        Task<bool> Remove(ByteArray entityId);
+        Task<bool> Contains(ByteArray entityId);
 
         [IdAction(9)]
-        Task<bool> Remove(ByteArray[] entityIds);
+        Task Remove(ByteArray entityId);
+
+        [IdAction(10)]
+        Task Remove(ByteArray[] entityIds);
     }
 }

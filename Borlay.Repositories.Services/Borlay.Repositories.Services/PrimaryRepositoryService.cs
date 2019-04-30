@@ -67,6 +67,13 @@ namespace Borlay.Repositories.Services
             return entities;
         }
 
+        public async Task<T[]> Get(int skip, int take)
+        {
+            var keys = repository.Get().Select(s => new ByteArray(s)).Skip(skip).Take(take).ToArray();
+            var entities = repository.Get(keys).Select(s => Serialize(s.Value)).ToArray();
+            return entities;
+        }
+
         public async Task<T[]> Get(OrderType orderType, int skip, int take)
         {
             var keys = repository.Get(orderType).Select(s => new ByteArray(s)).Skip(skip).Take(take).ToArray();
@@ -83,17 +90,25 @@ namespace Borlay.Repositories.Services
 
         public async Task<bool> Contains(ByteArray entityId)
         {
-            throw new NotImplementedException();
+            return repository.Contains(entityId);
         }
 
-        public async Task<bool> Remove(ByteArray entityId)
+        public async Task Remove(ByteArray entityId)
         {
-            throw new NotImplementedException();
+            using (var transaction = repository.CreateTransaction())
+            {
+                transaction.Remove(entityId);
+                await transaction.Commit();
+            }
         }
 
-        public async Task<bool> Remove(ByteArray[] entityIds)
+        public async Task Remove(ByteArray[] entityIds)
         {
-            throw new NotImplementedException();
+            using (var transaction = repository.CreateTransaction())
+            {
+                transaction.Remove(entityIds);
+                await transaction.Commit();
+            }
         }
 
         protected virtual T Serialize(byte[] bytes)
