@@ -7,37 +7,37 @@ using System.Threading.Tasks;
 
 namespace Borlay.Repositories.Services
 {
-    [NameScope("PrimaryRepositoryService")]
+    [Scope("PrimaryRepositoryService")]
     public interface IPrimaryRepositoryService<T> where T : class, IEntity
     {
-        [IdAction(1)]
+        [Action]
         Task Save(T entity);
 
-        [IdAction(2)]
+        [Action]
         Task Save(T[] entities);
 
-        [IdAction(3)]
+        [Action]
         Task<T> Get(ByteArray entityId);
 
-        [IdAction(4)]
+        [Action]
         Task<T[]> Get(ByteArray[] entityIds);
 
-        [IdAction(5)]
+        [Action]
         Task<T[]> Get(int skip, int take);
 
-        [IdAction(6)]
+        [Action]
         Task<T[]> Get(OrderType orderType, int skip, int take);
 
-        [IdAction(7)]
+        [Action]
         Task<T[]> GetDistinct(OrderType orderType, int skip, int take);
 
-        [IdAction(8)]
+        [Action]
         Task<bool> Contains(ByteArray entityId);
 
-        [IdAction(9)]
+        [Action]
         Task Remove(ByteArray entityId);
 
-        [IdAction(10)]
+        [Action]
         Task Remove(ByteArray[] entityIds);
     }
 }
