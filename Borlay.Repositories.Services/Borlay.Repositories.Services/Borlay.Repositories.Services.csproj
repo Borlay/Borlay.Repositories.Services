@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Paulius Kanoverskis</Authors>
     <Copyright>Paulius Kanoverskis</Copyright>
@@ -17,7 +17,7 @@
     <PackageReference Include="Borlay.Arrays" Version="1.0.2" />
     <PackageReference Include="Borlay.Handling" Version="1.0.27" />
     <PackageReference Include="Borlay.Repositories" Version="1.0.9" />
-    <PackageReference Include="Borlay.Serialization" Version="1.0.7" />
+    <PackageReference Include="Borlay.Serialization" Version="1.0.9" />
   </ItemGroup>
 
   <ItemGroup>
