@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Borlay.Protocol" Version="1.0.14" />
-    <PackageReference Include="Borlay.Repositories.RocksDb" Version="1.0.1" />
+    <PackageReference Include="Borlay.Protocol" Version="1.0.18" />
+    <PackageReference Include="Borlay.Repositories.RocksDb" Version="1.0.3" />
     <PackageReference Include="RocksDbNative" Version="5.17.2" />
   </ItemGroup>
 

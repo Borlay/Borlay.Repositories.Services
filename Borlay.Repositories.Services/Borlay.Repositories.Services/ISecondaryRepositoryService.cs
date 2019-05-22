@@ -11,33 +11,30 @@ namespace Borlay.Repositories.Services
     public interface ISecondaryRepositoryService<T> where T : class, IEntity
     {
         [Action]
-        Task Save(ByteArray parentId, T entity);
+        Task SaveAsync(ByteArray parentId, T entity);
 
         [Action]
-        Task Save(ByteArray parentId, T[] entities);
+        Task SaveAsync(ByteArray parentId, T[] entities);
 
         [Action]
-        Task<T> Get(ByteArray parentId, ByteArray entityId);
+        Task<T> GetAsync(ByteArray parentId, ByteArray entityId);
 
         [Action]
-        Task<T[]> Get(ByteArray parentId, ByteArray[] entityIds);
+        Task<T[]> GetAsync(ByteArray parentId, ByteArray[] entityIds);
 
         [Action]
-        Task<T[]> Get(ByteArray parentId, int skip, int take);
+        Task<T[]> GetAsync(ByteArray parentId, bool distinct, int skip, int take);
 
         [Action]
-        Task<T[]> Get(ByteArray parentId, OrderType orderType, int skip, int take);
+        Task<T[]> GetAsync(ByteArray parentId, OrderType orderType, bool distinct, int skip, int take);
 
         [Action]
-        Task<T[]> GetDistinct(ByteArray parentId, OrderType orderType, int skip, int take);
+        Task<bool> ExistAsync(ByteArray parentId, ByteArray entityId);
 
         [Action]
-        Task<bool> Contains(ByteArray parentId, ByteArray entityId);
+        Task RemoveAsync(ByteArray parentId, ByteArray entityId);
 
         [Action]
-        Task Remove(ByteArray parentId, ByteArray entityId);
-
-        [Action]
-        Task Remove(ByteArray parentId, ByteArray[] entityIds);
+        Task RemoveAsync(ByteArray parentId, ByteArray[] entityIds);
     }
 }

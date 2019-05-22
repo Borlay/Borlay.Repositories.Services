@@ -6,6 +6,7 @@ using RocksDbSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,9 @@ namespace Borlay.Repositories.Services.TestApp
         {
             Console.WriteLine("Getting started...");
 
+            //LaunchServerTest();
+            //SaveAndEntityOrderAscGet();
+
             LaunchServer();
             TryLaunchClient();
 
@@ -25,7 +29,7 @@ namespace Borlay.Repositories.Services.TestApp
             Console.ReadLine();
         }
 
-        private static void LaunchServer()
+        private static async void LaunchServer()
         {
             var host = new ProtocolHost();
             host.LoadFromReference<Program>();
@@ -38,6 +42,11 @@ namespace Borlay.Repositories.Services.TestApp
             var primaryRepository = new RocksPrimaryRepository(rocksDb, nameof(TestEntity));
             primaryRepository.WriteOptions.SetSync(false);
             host.Resolver.Register(primaryRepository);
+
+            var indexMaps = new IndexMapProvider<TestEntity>();
+            host.Resolver.Register(indexMaps);
+
+            indexMaps.AddScoreIndex(e => e.Score, IndexLevel.Entity, OrderType.Asc | OrderType.Desc);
 
             host.RegisterHandler<PrimaryRepositoryService<TestEntity>>(true);
 
@@ -73,22 +82,39 @@ namespace Borlay.Repositories.Services.TestApp
 
                 List<Task> tasks = new List<Task>();
 
+                var rand = new Random();
+
                 var watch = Stopwatch.StartNew();
-                for (int i = 0; i < entityId.Length; i++)
+                //for (int i = 0; i < entityId.Length; i++)
+                //{
+                //    var score = rand.Next();
+
+                //    var task = repository.SaveAsync(new TestEntity()
+                //    {
+                //        Id = entityId[i],
+                //        Name= "card 1",
+                //        Value = 1,
+                //        Score = i,
+                //    });
+                //    tasks.Add(task);
+
+                //    //var card = await repository.Get(entityId[i]);
+                //}
+
+                //await Task.WhenAll(tasks);
+
+                for (int i = 0; i < 3; i++)
                 {
-
-                    var task = repository.Save(new TestEntity()
+                    await repository.SaveAsync(new TestEntity()
                     {
-                        Id = entityId[i],
-                        Name= "card 1",
+                        Id = ByteArray.New(32),
+                        Name = "card 1",
                         Value = 1,
+                        Score = i,
                     });
-                    tasks.Add(task);
-
-                    //var card = await repository.Get(entityId[i]);
                 }
 
-                await Task.WhenAll(tasks);
+                var firstTen = await repository.GetAsync(OrderType.Asc, false, 0, 10);
 
                 watch.Stop();
                 // save async: 10k 0.82s
@@ -110,5 +136,8 @@ namespace Borlay.Repositories.Services.TestApp
 
         [Include(2)]
         public int Value { get; set; }
+
+        [Include(3)]
+        public long Score { get; set; }
     }
 }

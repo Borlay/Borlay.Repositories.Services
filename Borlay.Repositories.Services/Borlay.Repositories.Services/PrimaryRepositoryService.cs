@@ -8,12 +8,20 @@ using System.Threading.Tasks;
 
 namespace Borlay.Repositories.Services
 {
-    public class PrimaryRepositoryService<T> : IPrimaryRepositoryService<T> where T : class, IEntity
+    public class PrimaryRepositoryService<T> : IPrimaryRepositoryService<T>, IHasIndexMaps<T> where T : class, IEntity
     {
         protected readonly IPrimaryRepository repository;
         protected readonly ISerializer serializer;
 
+        public IndexMapProvider<T> IndexMaps { get; }
+
         public PrimaryRepositoryService(IPrimaryRepository repository, ISerializer serializer)
+            : this(repository, serializer, new IndexMapProvider<T>())
+        {
+
+        }
+
+        public PrimaryRepositoryService(IPrimaryRepository repository, ISerializer serializer, IndexMapProvider<T> indexMaps)
         {
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
@@ -21,24 +29,20 @@ namespace Borlay.Repositories.Services
             if (serializer == null)
                 throw new ArgumentNullException(nameof(serializer));
 
+            if (indexMaps == null)
+                throw new ArgumentNullException(nameof(indexMaps));
+
             this.repository = repository;
             this.serializer = serializer;
+            this.IndexMaps = indexMaps;
         }
 
-        public async Task Save(T entity)
+        public async Task SaveAsync(T entity)
         {
-            using (var transaction = repository.CreateTransaction())
-            {
-                var index = 0;
-                var buffer = new byte[1024];
-                serializer.AddBytes(entity, buffer, ref index);
-                transaction.AppendValue(entity.Id, buffer, index);
-
-                await transaction.Commit();
-            }
+            await SaveAsync(new T[] { entity });
         }
 
-        public async Task Save(T[] entities)
+        public async Task SaveAsync(T[] entities)
         {
             using (var transaction = repository.CreateTransaction())
             {
@@ -47,53 +51,52 @@ namespace Borlay.Repositories.Services
                 {
                     var index = 0;
                     serializer.AddBytes(entity, buffer, ref index);
-                    transaction.AppendValue(entity.Id, buffer, index);
+                    var key = transaction.AppendValue(entity.Id, buffer, index);
+
+                    foreach (var map in IndexMaps)
+                    {
+                        var score = map.GetScore(entity);
+                        transaction.AppendScoreIndex(entity.Id, key, score, map.Level, map.Order);
+                    }
                 }
 
                 await transaction.Commit();
             }
         }
 
-        public async Task<T> Get(ByteArray entityId)
+        public async Task<T> GetAsync(ByteArray entityId)
         {
-            var bytes = repository.Get(entityId);
+            var bytes = repository.GetValue(entityId);
             var entity = Serialize(bytes);
             return entity;
         }
 
-        public async Task<T[]> Get(ByteArray[] entityIds)
+        public async Task<T[]> GetAsync(ByteArray[] entityIds)
         {
-            var entities = repository.Get(entityIds).Select(s => Serialize(s.Value)).ToArray();
+            var entities = repository.GetValues(entityIds).Select(s => Serialize(s.Value)).ToArray();
             return entities;
         }
 
-        public async Task<T[]> Get(int skip, int take)
+        public async Task<T[]> GetAsync(bool distinct, int skip, int take)
         {
-            var keys = repository.Get().Select(s => new ByteArray(s)).Skip(skip).Take(take).ToArray();
-            var entities = repository.Get(keys).Select(s => Serialize(s.Value)).ToArray();
+            var entities = repository.GetValues(distinct).Skip(skip).Take(take)
+                .Select(s => Serialize(s.Value)).ToArray();
             return entities;
         }
 
-        public async Task<T[]> Get(OrderType orderType, int skip, int take)
+        public async Task<T[]> GetAsync(OrderType orderType, bool distinct, int skip, int take)
         {
-            var keys = repository.Get(orderType).Select(s => new ByteArray(s)).Skip(skip).Take(take).ToArray();
-            var entities = repository.Get(keys).Select(s => Serialize(s.Value)).ToArray();
+            var entities = repository.GetValues((OrderType)orderType, distinct).Skip(skip).Take(take)
+                .Select(s => Serialize(s.Value)).ToArray();
             return entities;
         }
 
-        public async Task<T[]> GetDistinct(OrderType orderType, int skip, int take)
-        {
-            var keys = repository.Get(orderType).Select(s => new ByteArray(s)).Distinct().Skip(skip).Take(take).ToArray();
-            var entities = repository.Get(keys).Select(s => Serialize(s.Value)).ToArray();
-            return entities;
-        }
-
-        public async Task<bool> Contains(ByteArray entityId)
+        public async Task<bool> ExistAsync(ByteArray entityId)
         {
             return repository.Contains(entityId);
         }
 
-        public async Task Remove(ByteArray entityId)
+        public async Task RemoveAsync(ByteArray entityId)
         {
             using (var transaction = repository.CreateTransaction())
             {
@@ -102,7 +105,7 @@ namespace Borlay.Repositories.Services
             }
         }
 
-        public async Task Remove(ByteArray[] entityIds)
+        public async Task RemoveAsync(ByteArray[] entityIds)
         {
             using (var transaction = repository.CreateTransaction())
             {

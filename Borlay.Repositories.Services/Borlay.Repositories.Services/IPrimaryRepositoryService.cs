@@ -11,33 +11,30 @@ namespace Borlay.Repositories.Services
     public interface IPrimaryRepositoryService<T> where T : class, IEntity
     {
         [Action]
-        Task Save(T entity);
+        Task SaveAsync(T entity);
 
         [Action]
-        Task Save(T[] entities);
+        Task SaveAsync(T[] entities);
 
         [Action]
-        Task<T> Get(ByteArray entityId);
+        Task<T> GetAsync(ByteArray entityId);
 
         [Action]
-        Task<T[]> Get(ByteArray[] entityIds);
+        Task<T[]> GetAsync(ByteArray[] entityIds);
 
         [Action]
-        Task<T[]> Get(int skip, int take);
+        Task<T[]> GetAsync(bool distinct, int skip, int take);
 
         [Action]
-        Task<T[]> Get(OrderType orderType, int skip, int take);
+        Task<T[]> GetAsync(OrderType orderType, bool distinct, int skip, int take);
 
         [Action]
-        Task<T[]> GetDistinct(OrderType orderType, int skip, int take);
+        Task<bool> ExistAsync(ByteArray entityId);
 
         [Action]
-        Task<bool> Contains(ByteArray entityId);
+        Task RemoveAsync(ByteArray entityId);
 
         [Action]
-        Task Remove(ByteArray entityId);
-
-        [Action]
-        Task Remove(ByteArray[] entityIds);
+        Task RemoveAsync(ByteArray[] entityIds);
     }
 }
